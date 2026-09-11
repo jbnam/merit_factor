@@ -1,0 +1,79 @@
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] ExperimentLogger initialized: cem_golay
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] ================================================================================
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Experiment: cem_golay
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] ================================================================================
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Configuration:
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO]   block_size: 256
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO]   len_bin_seq: 1024
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO]   method_dist: naive
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO]   num_blocks: 4
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO]   num_epochs: 5
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO]   num_samples: 1000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO]   ratio: 0.5
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] ================================================================================
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000001 Batch 000000: accuracy: 0.550000 | loss: 0.450000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000001 Batch 000001: accuracy: 0.560000 | loss: 0.440000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000001 Batch 000002: accuracy: 0.570000 | loss: 0.430000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000001 Batch 000003: accuracy: 0.580000 | loss: 0.420000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000001 Batch 000004: accuracy: 0.590000 | loss: 0.410000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000001 Batch 000005: accuracy: 0.600000 | loss: 0.400000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000001 Batch 000006: accuracy: 0.610000 | loss: 0.390000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000001 Batch 000007: accuracy: 0.620000 | loss: 0.380000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000001 Batch 000008: accuracy: 0.630000 | loss: 0.370000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000001 Batch 000009: accuracy: 0.640000 | loss: 0.360000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Epoch 000001: accuracy: 0.550000 | loss: 0.450000 | val_loss: 0.510000 | Samples: 1,000 | Time: 0.100s | Throughput: 9980 seq/s
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000002 Batch 000000: accuracy: 0.600000 | loss: 0.400000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000002 Batch 000001: accuracy: 0.610000 | loss: 0.390000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000002 Batch 000002: accuracy: 0.620000 | loss: 0.380000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000002 Batch 000003: accuracy: 0.630000 | loss: 0.370000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000002 Batch 000004: accuracy: 0.640000 | loss: 0.360000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000002 Batch 000005: accuracy: 0.650000 | loss: 0.350000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000002 Batch 000006: accuracy: 0.660000 | loss: 0.340000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000002 Batch 000007: accuracy: 0.670000 | loss: 0.330000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000002 Batch 000008: accuracy: 0.680000 | loss: 0.320000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000002 Batch 000009: accuracy: 0.690000 | loss: 0.310000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Epoch 000002: accuracy: 0.600000 | loss: 0.400000 | val_loss: 0.470000 | Samples: 1,000 | Time: 0.100s | Throughput: 9990 seq/s
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Checkpoint saved (epoch 2): model_epoch_2.pt | best_accuracy: 0.600000 | best_loss: 0.400000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000003 Batch 000000: accuracy: 0.650000 | loss: 0.350000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000003 Batch 000001: accuracy: 0.660000 | loss: 0.340000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000003 Batch 000002: accuracy: 0.670000 | loss: 0.330000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000003 Batch 000003: accuracy: 0.680000 | loss: 0.320000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000003 Batch 000004: accuracy: 0.690000 | loss: 0.310000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000003 Batch 000005: accuracy: 0.700000 | loss: 0.300000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000003 Batch 000006: accuracy: 0.710000 | loss: 0.290000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000003 Batch 000007: accuracy: 0.720000 | loss: 0.280000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000003 Batch 000008: accuracy: 0.730000 | loss: 0.270000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000003 Batch 000009: accuracy: 0.740000 | loss: 0.260000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Epoch 000003: accuracy: 0.650000 | loss: 0.350000 | val_loss: 0.430000 | Samples: 1,000 | Time: 0.100s | Throughput: 9993 seq/s
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000004 Batch 000000: accuracy: 0.700000 | loss: 0.300000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000004 Batch 000001: accuracy: 0.710000 | loss: 0.290000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000004 Batch 000002: accuracy: 0.720000 | loss: 0.280000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000004 Batch 000003: accuracy: 0.730000 | loss: 0.270000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000004 Batch 000004: accuracy: 0.740000 | loss: 0.260000
+[14:47:34] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000004 Batch 000005: accuracy: 0.750000 | loss: 0.250000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000004 Batch 000006: accuracy: 0.760000 | loss: 0.240000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000004 Batch 000007: accuracy: 0.770000 | loss: 0.230000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000004 Batch 000008: accuracy: 0.780000 | loss: 0.220000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000004 Batch 000009: accuracy: 0.790000 | loss: 0.210000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Epoch 000004: accuracy: 0.700000 | loss: 0.300000 | val_loss: 0.390000 | Samples: 1,000 | Time: 0.100s | Throughput: 9993 seq/s
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Checkpoint saved (epoch 4): model_epoch_4.pt | best_accuracy: 0.700000 | best_loss: 0.300000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000005 Batch 000000: accuracy: 0.750000 | loss: 0.250000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000005 Batch 000001: accuracy: 0.760000 | loss: 0.240000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000005 Batch 000002: accuracy: 0.770000 | loss: 0.230000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000005 Batch 000003: accuracy: 0.780000 | loss: 0.220000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000005 Batch 000004: accuracy: 0.790000 | loss: 0.210000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000005 Batch 000005: accuracy: 0.800000 | loss: 0.200000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000005 Batch 000006: accuracy: 0.810000 | loss: 0.190000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000005 Batch 000007: accuracy: 0.820000 | loss: 0.180000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000005 Batch 000008: accuracy: 0.830000 | loss: 0.170000
+[14:47:35] [0:00:00] [CPU: 0.0% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [DEBUG] Epoch 000005 Batch 000009: accuracy: 0.840000 | loss: 0.160000
+[14:47:35] [0:00:01] [CPU: 2.8% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Epoch 000005: accuracy: 0.750000 | loss: 0.250000 | val_loss: 0.350000 | Samples: 1,000 | Time: 0.100s | Throughput: 9993 seq/s
+[14:47:35] [0:00:01] [CPU: 2.8% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] ================================================================================
+[14:47:35] [0:00:01] [CPU: 2.8% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Experiment Summary
+[14:47:35] [0:00:01] [CPU: 2.8% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] ================================================================================
+[14:47:35] [0:00:01] [CPU: 2.8% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Total epochs: 5
+[14:47:35] [0:00:01] [CPU: 2.8% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Total samples: 5,000
+[14:47:35] [0:00:01] [CPU: 2.8% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Total time: 0:00:01
+[14:47:35] [0:00:01] [CPU: 2.8% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Average time/epoch: 0.213s
+[14:47:35] [0:00:01] [CPU: 2.8% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] Best throughput: 9993 seq/s (epoch 5)
+[14:47:35] [0:00:01] [CPU: 2.8% | RAM: 15.8/31.0GB | GPU: 0.00/0.00GB] [INFO] ================================================================================
