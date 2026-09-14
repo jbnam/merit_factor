@@ -13,7 +13,7 @@ This module provides:
 - Data persistence with HDF5 format
 - Performance optimization and memory management
 
-Author: NAMRI
+Author: NAMARI
 License: Apache License 2.0
 Version: 0.1.0
 
@@ -32,7 +32,6 @@ File Structure:
     - data_elites.hdf5: Elite sequence data
 """
 
-import logging
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Tuple
@@ -42,24 +41,14 @@ from enum import Enum
 import torch
 import h5py
 
-from src.common import cm
+import src.common as cm
+import src.cem.parser as parser
+import src.utils.logger as mf_logger
+import src.utils.cuda_parameters as cuda_params
 
 # ============================================================================
 # Configuration Data Classes
 # ============================================================================
-
-class DistributionMethod(Enum):
-    """Enumeration for distribution initialization methods.
-
-    Attributes
-    ----------
-    NAIVE : str
-        Initialize with uniform 0.5 probability.
-    RECURSIVE : str
-        Load from previous run with smaller sequence length.
-    """
-    NAIVE = "naive"
-    RECURSIVE = "recursive"
 
 @dataclass
 class CEMInitConfig:
@@ -67,61 +56,38 @@ class CEMInitConfig:
 
     Attributes
     ----------
+    experiment_name : str
+        Name of an experiment (default: "cem").
     len_bin_seq : int
         Length of binary sequences (16-4096).
     method_dist : str
         Distribution method ("naive" or "recursive").
+    num_epochs : int
+        Number of epochs
+    num_samples : int
+        Number of binary sequences to be chosen.
+    ratio : float
+        Ratio of the number of elites to number of binary sequeneces per iteration.
     num_limbs : int
         Number of limbs per sequence.
+    grid_size : int
+        Number of block per grid.
+    block_size : int
+        Number of threads per block.
+    num_iterations : int
+        Number of iterations per epoch.
     """
+    experiment_name: str = "cem"
     len_bin_seq: int
     method_dist: str
+    num_epochs: int
+    num_samples: int
+    ratio: float
+    num_elites_saved: int
     num_limbs: int
-
-    def __post_init__(self):
-        """Validate configuration."""
-        self._validate_len_bin_seq()
-        self._validate_method_dist()
-        self._validate_num_limbs()
-
-    def _validate_len_bin_seq(self) -> None:
-        """Validate sequence length."""
-        # WARNING! len_bin_seq must be in [16, 4096] due to memory/algorithm constraints
-        if not isinstance(self.len_bin_seq, int):
-            raise TypeError(f"len_bin_seq must be int, got {type(self.len_bin_seq)}")
-
-        if self.len_bin_seq < 16 or self.len_bin_seq > 4096:
-            raise ValueError(
-                f"len_bin_seq must be in [16, 4096], got {self.len_bin_seq}"
-            )
-
-    def _validate_method_dist(self) -> None:
-        """Validate distribution method."""
-        # WARNING! method_dist must be one of predefined methods
-        valid_methods = [m.value for m in DistributionMethod]
-
-        if self.method_dist not in valid_methods:
-            raise ValueError(
-                f"method_dist must be one of {valid_methods}, "
-                f"got '{self.method_dist}'"
-            )
-
-    def _validate_num_limbs(self) -> None:
-        """Validate number of limbs."""
-        # WARNING! num_limbs must be positive and match len_bin_seq
-        if not isinstance(self.num_limbs, int):
-            raise TypeError(f"num_limbs must be int, got {type(self.num_limbs)}")
-
-        if self.num_limbs <= 0:
-            raise ValueError(f"num_limbs must be positive, got {self.num_limbs}")
-
-        # Verify consistency with len_bin_seq
-        expected_limbs = (self.len_bin_seq + 31) // 32
-        if self.num_limbs != expected_limbs:
-            raise ValueError(
-                f"num_limbs {self.num_limbs} doesn't match expected {expected_limbs} "
-                f"for len_bin_seq={self.len_bin_seq}"
-            )
+    grid_size: int
+    block_size: int
+    num_iterations: int
 
 @dataclass
 class CEMInitResult:
@@ -141,7 +107,7 @@ class CEMInitResult:
         Path to elites data file.
     max_merit_dict : dict
         Dictionary of elite sequences with maximum merit factor.
-    logger : logging.Logger
+    logger : mf_logger.ExperimentLogger
         Configured logger instance.
     """
     distribution: torch.Tensor
@@ -150,7 +116,7 @@ class CEMInitResult:
     summary_elites_path: str
     data_elites_path: str
     max_merit_dict: Dict[str, Any]
-    logger: logging.Logger
+    logger: mf_logger.ExperimentLogger
 
 
 # ============================================================================
@@ -162,52 +128,41 @@ class CEMInitializer:
 
     Parameters
     ----------
-    base_dir : str, optional
-        Base directory for logs. Default is current directory.
+    parser : parser.CEMConfig
+        CEM Configuration parsed.
 
     Examples
     --------
-    >>> initializer = CEMInitializer()
+    >>> parser = parser.CEMConfig()
+    >>> initializer = CEMInitializer(parser)
     >>> result = initializer.initialize(len_bin_seq=256, method_dist="naive", num_limbs=8)
     """
 
-    def __init__(self, base_dir: str = "."):
+    def __init__(self, parser : parser.CEMConfig):
         """Initialize CEM initializer."""
-        self.base_dir = Path(base_dir)
-        self.base_dir.mkdir(parents=True, exist_ok=True)
+        self.config = CEMInitConfig()
+        self.init_results = self.initisize(parser)
 
-    def _create_log_directory(
-        self,
-        method_dist: str,
-        len_bin_seq: int
-    ) -> Tuple[str, str]:
+    def _create_log_directory( self ) -> Tuple[str, str]:
         """
         Create log directory structure and return paths.
 
         Parameters
         ----------
-        method_dist : str
-            Distribution method.
-        len_bin_seq : int
-            Sequence length.
+        self
 
         Returns
         -------
         tuple of (str, str)
             (timestamp_log_dir, method_len_dir)
-
-        WARNING! Directory structure must be: logs/{method}/{len_seq}/{timestamp}/
-        WARNING! Timestamp format must be ISO format with proper escaping
         """
         # Create method/length directory structure
-        method_dir = self.base_dir / "logs" / method_dist
+        method_dir = self.exp_logger.log_dir / self.config.method_dist
         method_dir.mkdir(parents=True, exist_ok=True)
 
-        method_len_dir = method_dir / str(len_bin_seq)
+        method_len_dir = method_dir / str(self.config.len_bin_seq)
         method_len_dir.mkdir(parents=True, exist_ok=True)
 
-        # Create timestamped subdirectory
-        # WARNING! Use %H:%M:%S not $H-$M-%S, and %Y-%m-%d not strfttime
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         timestamp_log_dir = method_len_dir / timestamp
         timestamp_log_dir.mkdir(parents=True, exist_ok=True)
@@ -216,8 +171,7 @@ class CEMInitializer:
 
     def _initialize_naive_distribution(
         self,
-        len_bin_seq: int,
-        logger: logging.Logger
+        len_bin_seq: int
     ) -> Tuple[torch.Tensor, Dict[str, Any]]:
         """
         Initialize naive distribution (uniform 0.5 probability).
@@ -226,7 +180,7 @@ class CEMInitializer:
         ----------
         len_bin_seq : int
             Sequence length.
-        logger : logging.Logger
+        logger : mf_logger.ExperimentLogger
             Logger instance.
 
         Returns
@@ -240,7 +194,6 @@ class CEMInitializer:
         """
         logger.info("Initializing naive distribution (uniform 0.5)")
 
-        # WARNING! Create distribution with correct dtype and value
         distribution = torch.full(
             (len_bin_seq,),
             0.5,
@@ -261,7 +214,7 @@ class CEMInitializer:
         self,
         method_dist_dir: str,
         len_bin_seq: int,
-        logger: logging.Logger
+        logger: mf_logger.ExperimentLogger
     ) -> Tuple[torch.Tensor, Dict[str, Any]]:
         """
         Initialize recursive distribution from previous run.
@@ -272,7 +225,7 @@ class CEMInitializer:
             Method distribution directory.
         len_bin_seq : int
             Target sequence length.
-        logger : logging.Logger
+        logger : mf_logger.ExperimentLogger
             Logger instance.
 
         Returns
@@ -405,9 +358,7 @@ class CEMInitializer:
 
     def initialize(
         self,
-        len_bin_seq: int,
-        method_dist: str,
-        num_limbs: int
+        parser : parser.CEMConfig
     ) -> CEMInitResult:
         """
         Initialize CEM with all necessary components.
@@ -436,50 +387,62 @@ class CEMInitializer:
 
         Examples
         --------
-        >>> initializer = CEMInitializer()
+        >>> parser = parser.CEMConfig()
+        >>> initializer = CEMInitializer(parser)
         >>> result = initializer.initialize(256, "naive", 8)
         >>> logger = result.logger
         """
-        # Validate configuration
-        try:
-            config = CEMInitConfig(
-                len_bin_seq=len_bin_seq,
-                method_dist=method_dist,
-                num_limbs=num_limbs
-            )
-        except (TypeError, ValueError) as e:
-            raise ValueError(f"Invalid CEM configuration: {e}")
+        self.config.experiment_name = parser.experiment_name
+        self.config.len_bin_seq = parser.len_bin_seq
+        self.config.method_dist = parser.method_dist
+        self.config.num_epochs = parser.num_epochs
+        self.config.num_samples = parser.num_samples
+        self.config.ratio = parser.ratio
+
+        # Compute the num_limbs and num_elites_saved
+        self.config.num_limbs = (self.config.len_bin_seq + cm.LIMB_BIT_SIZE - 1) // cm.LIMB_BIT_SIZE
+
+        # Compute num_elites_saved,
+        gpu_params = cuda_params.GPUArchitectureParams()
+        dim_calculator = cuda_params.KernelDimensionCalculator(gpu_params)
+        dimensions = dim_calculator.compute_dimensions(self.config.num_samples, self.config.num_limbs)
+
+        self.config.grid_size = dimensions.grid_size
+        self.config.block_size = dimensions.block_size
+        self.config.num_iterations = dimensions.num_iterations
+
+        # Set up mf_logger.ExperimentLogger()
+        self.exp_logger = mf_logger.ExperimentLogger(experiment_name=self.config.experiment_name)
 
         # Create directories and logger
         timestamp_log_dir, method_len_dir = self._create_log_directory(
-            method_dist,
-            len_bin_seq
+            self.config.method_dist,
+            self.config.len_bin_seq
         )
 
         log_file_path = Path(timestamp_log_dir) / cm.LOG_FILE_NAME
-        logger = setup_logger(str(log_file_path))
 
         logger.info("=" * 80)
         logger.info("Cross-Entropy Method for Golay Merit Factor Problem")
         logger.info("=" * 80)
-        logger.info(f"Configuration: {config}")
+        logger.info(f"Configuration: {self.config}")
         logger.info(f"Log directory: {timestamp_log_dir}")
 
         # Initialize distribution
         try:
-            if method_dist == "naive":
+            if self.config.method_dist == "naive":
                 distribution, max_merit_dict = self._initialize_naive_distribution(
-                    len_bin_seq,
+                    self.config.len_bin_seq,
                     logger
                 )
-            elif method_dist == "recursive":
+            elif self.config.method_dist == "recursive":
                 distribution, max_merit_dict = self._initialize_recursive_distribution(
                     method_len_dir,
-                    len_bin_seq,
+                    self.config.len_bin_seq,
                     logger
                 )
             else:
-                raise ValueError(f"Unknown method: {method_dist}")
+                raise ValueError(f"Unknown method: {self.config.method_dist}")
 
         except Exception as e:
             logger.error(f"Failed to initialize distribution: {e}", exc_info=True)
@@ -510,10 +473,7 @@ class CEMInitializer:
 # ============================================================================
 
 def initialize_cem(
-    len_bin_seq: int,
-    method_dist: str,
-    num_limbs: int,
-    base_dir: str = "."
+    parser : parser.CEMConfig
 ) -> CEMInitResult:
     """
     Convenience function to initialize CEM (legacy API).
@@ -539,8 +499,9 @@ def initialize_cem(
     >>> result = initialize_cem(256, "naive", 8)
     >>> logger = result.logger
     """
-    initializer = CEMInitializer(base_dir=base_dir)
-    return initializer.initialize(len_bin_seq, method_dist, num_limbs)
+    parser = parser.CEMConfig()
+    initializer = CEMInitializer(parser)
+    return initializer.initialize(parser)
 
 if __name__ == "__main__":
     """Comprehensive example demonstrating CEM initialization."""

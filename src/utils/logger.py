@@ -20,7 +20,7 @@ Version: 0.1.0
 Example
 -------
     >>> from src.utils.logger import ExperimentLogger
-    >>> logger = ExperimentLogger("cem_golay", len_bin_seq=256)
+    >>> logger = ExperimentLogger("cem_golay")
     >>> logger.log_initialization(config_dict)
     >>> for epoch in range(num_epochs):
     ...     with logger.log_epoch_context(epoch, samples=10000) as metrics:
@@ -46,16 +46,7 @@ from contextlib import contextmanager
 import psutil
 import torch
 
-# ============================================================================
-# File Names and Environment Constants
-# ============================================================================
-
-# File names
-LOG_FILE_NAME = "experiment.log"
-
-# Environment variable for log directory
-DIR_PROJECT=str(Path(__file__).resolve().parent.parent.parent)
-os.environ["DIR_PROJECT"] = DIR_PROJECT
+import src.common as cm
 
 # ============================================================================
 # Configuration Classes
@@ -68,7 +59,7 @@ class LoggerConfig:
     Parameters
     ----------
     log_dir : str, optional
-        Base directory for logs. Default is "./logs".
+        Base directory for logs. Default is cm.LOG_DIR_NAME ("logs").
     resource_cache_interval : float, optional
         Resource monitoring cache interval in seconds. Default is 1.0.
     max_log_file_size_mb : int, optional
@@ -83,14 +74,16 @@ class LoggerConfig:
     ValueError
         If configuration values are invalid.
     """
-    log_dir: str = os.path.join(os.getenv("DIR_PROJECT", "."), "logs")
-    Path(log_dir).mkdir(parents=True, exist_ok=True)
+    log_dir: str = os.path.join(os.getenv("DIR_PROJECT", "."), cm.LOG_DIR_NAME)
     resource_cache_interval: float = 1.0
     max_log_file_size_mb: int = 500
     backup_count: int = 10
     enable_resource_monitoring: bool = True
 
     def __post_init__(self):
+        """Log directory path check"""
+        Path(self.log_dir).mkdir(parents=True, exist_ok=True)
+
         """Validate configuration."""
         if self.resource_cache_interval < 0:
             raise ValueError(f"resource_cache_interval must be >= 0, got {self.resource_cache_interval}")
@@ -391,8 +384,6 @@ class ExperimentLogger:
     ----------
     experiment_name : str
         Name of the experiment.
-    len_bin_seq : int, optional
-        Binary sequence length for Golay problem (used in path).
     config : LoggerConfig, optional
         Logger configuration.
 
@@ -411,7 +402,7 @@ class ExperimentLogger:
 
     Examples
     --------
-    >>> logger = ExperimentLogger("cem_golay", len_bin_seq=256)
+    >>> logger = ExperimentLogger("cem_golay")
     >>> logger.log_initialization({"num_epochs": 10})
     >>> for epoch in range(10):
     ...     with logger.log_epoch_context(epoch, samples=1000) as metrics:
@@ -420,11 +411,11 @@ class ExperimentLogger:
     >>> logger.save_all_metrics()
     """
 
+    logger_config = LoggerConfig()
+
     def __init__(
         self,
         experiment_name: str,
-        len_bin_seq: Optional[int] = None,
-        config: Optional[LoggerConfig] = None
     ):
         """Initialize experiment logger.
 
@@ -432,38 +423,28 @@ class ExperimentLogger:
         ----------
         experiment_name : str
             Name of experiment.
-        len_bin_seq : int, optional
-            Binary sequence length.
-        config : LoggerConfig, optional
-            Logger configuration.
         """
         self.experiment_name = experiment_name
-        self.len_bin_seq = len_bin_seq
-        self.config = config if config is not None else LoggerConfig()
         self.start_time = time.time()
 
         # Setup directories
         self._setup_directories()
 
         # Setup monitoring
-        self.resource_monitor = ResourceMonitor(self.config.resource_cache_interval)
+        self.resource_monitor = ResourceMonitor(self.logger_config.resource_cache_interval)
         self.summary = ExperimentSummary()
 
         # Setup logger
         self.logger = self._setup_logger()
 
-        self.logger.info(f"ExperimentLogger initialized: {experiment_name}")
+        self.logger.info(f"ExperimentLogger initialized: {self.experiment_name}")
 
     def _setup_directories(self) -> None:
         """Setup log directory structure.
         """
-        base = Path(self.config.log_dir)
+        base = Path(self.logger_config.log_dir)
 
-        if self.len_bin_seq:
-            self.log_dir = base / self.experiment_name / str(self.len_bin_seq) / datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        else:
-            self.log_dir = base / self.experiment_name / datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-
+        self.log_dir = base / self.experiment_name
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
     def _setup_logger(self) -> logging.Logger:
@@ -475,28 +456,28 @@ class ExperimentLogger:
             Configured logger.
         """
         logger = logging.getLogger(self.experiment_name)
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(cm.LOG_LEVEL)
 
         if logger.hasHandlers():
             logger.handlers.clear()
 
         # File handler
-        log_file = self.log_dir / LOG_FILE_NAME
+        log_file = self.log_dir / cm.LOG_FILE_NAME
 
         try:
             file_handler = logging.handlers.RotatingFileHandler(
                 log_file,
-                maxBytes=self.config.max_log_file_size_mb * 1024 * 1024,
-                backupCount=self.config.backup_count
+                maxBytes=self.logger_config.max_log_file_size_mb * 1024 * 1024,
+                backupCount=self.logger_config.backup_count
             )
-            file_handler.setLevel(logging.DEBUG)
+            file_handler.setLevel(cm.LOG_LEVEL)
         except OSError as e:
             print(f"Warning: Failed to create log file {log_file}: {e}")
             file_handler = None
 
         # Console handler
         console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setLevel(logging.INFO)
+        console_handler.setLevel(cm.LOG_LEVEL)
 
         # Formatter
         log_format = (
@@ -533,7 +514,6 @@ class ExperimentLogger:
         Examples
         --------
         >>> logger.log_initialization({
-        ...     "len_bin_seq": 256,
         ...     "num_epochs": 10,
         ...     "method": "naive"
         ... })
@@ -792,10 +772,9 @@ if __name__ == "__main__":
         print("-" * 80)
 
 
-        logger = ExperimentLogger("cem_golay", len_bin_seq=1024)
+        logger = ExperimentLogger("cem_golay")
 
         logger.log_initialization({
-            "len_bin_seq": 1024,
             "method_dist": "naive",
             "num_epochs": 5,
             "num_samples": 1000,
@@ -841,7 +820,7 @@ if __name__ == "__main__":
                     }
                 )
 
-        print(f"✓ Training simulation completed")
+        print(f" Training simulation completed")
 
         # Example 3: Summary
         print("\n[Example 3] Experiment Summary")

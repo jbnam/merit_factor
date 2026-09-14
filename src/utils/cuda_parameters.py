@@ -191,9 +191,6 @@ class GPUArchitectureParams:
         """
         Get registers per SM based on compute capability.
 
-        Source: NVIDIA CUDA Programming Guide
-        https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capabilities
-
         Parameters
         ----------
         major : int
@@ -220,9 +217,6 @@ class GPUArchitectureParams:
     def _get_max_registers_per_thread(major: int, minor: int) -> int:
         """
         Get max registers per thread based on compute capability.
-
-        Source: NVIDIA CUDA Programming Guide
-        https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capabilities
 
         Parameters
         ----------

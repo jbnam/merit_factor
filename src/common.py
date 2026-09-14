@@ -19,6 +19,9 @@ The maximum number of 32-bit registers per thread on 1080 Ti is 255.
 Hence, the maximum number of registers available for a binary sequence per thread is
 255 - 32 = 223. (There are extra 32 regeisters for local variables in the CUDA kernel)
 """
+import os
+from pathlib import Path
+import logging
 
 import torch
 import numpy as np
@@ -79,11 +82,25 @@ N_FLOAT64 = np.float64
 # File Paths
 # ============================================================================
 
-LOG_FILE_NAME = "experiments.log"
+LOG_DIR_NAME = "logs"
+LOG_FILE_NAME = "experiment.log"
 SUMMARY_BIN_SEQ_FILE_NAME = "summary_bin_seq.hdf5"
 SUMMARY_ELITES_FILE_NAME = "summary_elites.hdf5"
 DATA_ELITES_FILE_NAME = "data_elites.hdf5"
 
 # ============================================================================
-# Conguration Options
+# Environmental constants and Conguration Options
 # ============================================================================
+
+# Methods for Bernoulli distributions
+# "naive" method conducts CEM for a fixed length of binary sequences
+# independently, while "recursive" method for a length of binary sequences
+# uses the distributions of elites from the maximum length of sequences saved
+METHOD_DIST = ["naive", "recursive"]
+
+# Environment variable for log directory
+DIR_PROJECT = str(Path(__file__).resolve().parent.parent)
+os.environ["DIR_PROJECT"] = DIR_PROJECT
+
+# Logging level
+LOG_LEVEL = logging.INFO

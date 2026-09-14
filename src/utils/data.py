@@ -73,7 +73,7 @@ class CompressionMethod(Enum):
 # ============================================================================
 
 class HDF5DataManager:
-    """Professional HDF5 data manager with validation and optimization.
+    """HDF5 data manager with validation and optimization.
 
     Parameters
     ----------
