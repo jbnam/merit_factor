@@ -9,7 +9,7 @@ This module provides functionality to extract the top-performing binary sequence
 (elite candidates) from a collection based on their associated scores,
 with full support for CPU operations and performance optimization.
 
-Author: NAMRI
+Author: MJMARI
 License: Apache License 2.0
 Version: 0.1.0
 

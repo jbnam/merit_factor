@@ -13,7 +13,7 @@ This module provides:
 - Data persistence with HDF5 format
 - Performance optimization and memory management
 
-Author: NAMARI
+Author: MJMARI
 License: Apache License 2.0
 Version: 0.1.0
 
@@ -44,6 +44,7 @@ import src.common as cm
 import src.cem.parser as parser
 import src.utils.logger as mf_logger
 import src.utils.cuda_parameters as cuda_params
+import src.utils.stats as stats
 
 # ============================================================================
 # Configuration Data Classes
@@ -118,8 +119,6 @@ class CEMInitResult:
     summary_elites_path: str
     data_elites_path: str
 
-    max_merit_dict: Dict[str, Any]
-
     logger: mf_logger.ExperimentLogger
 
 
@@ -145,6 +144,10 @@ class CEMInitializer:
     def __init__(self, pars_config : parser.CEMConfig):
         """Initialize CEM initializer."""
         self.config = CEMInitConfig()
+
+        # Set up mf_logger.ExperimentLogger()
+        self.logger = mf_logger.ExperimentLogger(experiment_name=self.config.experiment_name)
+
         self.init_results = self.initisize(pars_config)
 
     def _create_log_directory(self) -> Tuple[str, str]:
@@ -160,7 +163,7 @@ class CEMInitializer:
             (timestamp_log_dir, method_len_dir)
         """
         # Create method/length directory structure
-        method_dir = self.exp_logger.log_dir / self.config.method_dist
+        method_dir = self.logger.log_dir / self.config.method_dist
         method_dir.mkdir(parents=True, exist_ok=True)
 
         method_len_dir = method_dir / str(self.config.len_bin_seq)
@@ -170,7 +173,7 @@ class CEMInitializer:
         timestamp_log_dir = method_len_dir / timestamp
         timestamp_log_dir.mkdir(parents=True, exist_ok=True)
 
-        return str(timestamp_log_dir), str(method_len_dir)
+        return str(method_len_dir), str(timestamp_log_dir)
 
     def initialize(
         self,
@@ -223,11 +226,8 @@ class CEMInitializer:
         self.config.block_size = dimensions.block_size
         self.config.num_iterations = dimensions.num_iterations
 
-        # Set up mf_logger.ExperimentLogger()
-        self.exp_logger = mf_logger.ExperimentLogger(experiment_name=self.config.experiment_name)
-
         # Create directories and logger
-        timestamp_log_dir, method_len_dir = self._create_log_directory(
+        method_len_dir, timestamp_log_dir = self._create_log_directory(
             self.config.method_dist,
             self.config.len_bin_seq
         )
@@ -238,14 +238,13 @@ class CEMInitializer:
         logger.info("Cross-Entropy Method for Golay Merit Factor Problem")
         logger.info("=" * 80)
         logger.info(f"Configuration: {self.config}")
-        logger.info(f"Log directory: {timestamp_log_dir}")
 
         # Initialize distribution
         try:
             if self.config.method_dist == cm.METHOD_DIST[0]:
-                distribution, max_merit_dict = self._initialize_naive_distribution()
+                distribution, max_merit_dict = self._initialize_naive_distribution(method_len_dir, timestamp_log_dir)
             elif self.config.method_dist == cm.METHOD_DIST[1]:
-                distribution, max_merit_dict = self._initialize_recursive_distribution(method_len_dir)
+                distribution, max_merit_dict = self._initialize_recursive_distribution(method_len_dir, timestamp_log_dir)
             else:
                 raise ValueError(f"Unknown method: {self.config.method_dist}")
 
@@ -272,12 +271,19 @@ class CEMInitializer:
             logger=logger
         )
 
-    def _initialize_naive_distribution(self) -> Tuple[torch.Tensor, Dict[str, Any]]:
+    def _initialize_naive_distribution(self,
+                                       method_len_dir: str,
+                                       timestamp_log_dir: str) -> torch.Tensor:
         """
         Initialize naive distribution (uniform 0.5 probability).
 
         Parameters
         ----------
+        method_len_dir
+            Path of method_dist / len_bin_seq.
+
+        timestamp_log_dir
+            Path of method_len_dir / timestamp.
 
         Returns
         -------
@@ -289,6 +295,11 @@ class CEMInitializer:
         >>>
         >>> dist, max_dict = initializer._initialize_naive_distribution()
         """
+
+        # TODO TODO
+        # Check if there exists a previously completed
+        if
+
         logger.info("Initializing naive distribution (uniform 0.5)")
 
         distribution = torch.full(
@@ -297,27 +308,24 @@ class CEMInitializer:
             dtype=cm.T_FLOAT32
         )
 
-        # Initialize empty max merit dictionary
-        max_merit_dict = {
-            "bin_seq_2d": torch.empty((1, (self.config.len_bin_seq + cm.LIMB_BIT_SIZE - 1) // cm.LIMB_BIT_SIZE), dtype=cm.T_INT32),
-            "merit_factor": 0.0
-        }
-
         logger.info(f"Initialized naive distribution: shape={distribution.shape}")
 
-        return distribution, max_merit_dict
+        return distribution
 
     def _initialize_recursive_distribution(
         self,
         method_len_dir: str,
-    ) -> Tuple[torch.Tensor, Dict[str, Any]]:
+        timestamp_log_dir: str) -> Tuple[torch.Tensor, Dict[str, Any]]:
         """
         Initialize recursive distribution from previous run.
 
         Parameters
         ----------
-        method_len_dir: str
+        method_len_dir
             Path of method_dist / len_bin_seq.
+
+        timestamp_log_dir
+            Path of method_len_dir / timestamp.
 
         Returns
         -------

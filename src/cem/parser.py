@@ -13,7 +13,7 @@ This module provides:
 - Type-safe configuration data classes
 - Comprehensive documentation and examples
 
-Author: NAMARI
+Author: MJMARI
 License: Apache License 2.0
 Version: 0.1.0
 
@@ -28,20 +28,15 @@ Argument Validation:
 Error Handling:
   - Clear error messages for invalid arguments
   - Suggests valid ranges for out-of-range values
-  - Logs all validation failures
 """
 
 import argparse
-from email import parser
-import logging
 import sys
+import logging
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass, asdict
-from enum import Enum
 
 import src.common as cm
-
-logger = logging.getLogger(__name__)
 
 # ============================================================================
 # Configuration Data Classes
@@ -96,56 +91,45 @@ class CEMConfig:
     def _validate_experiment_name(self) -> None:
         """Validate experiment name."""
         if not isinstance(self.experiment_name, str):
-            logger.error(f"experiment_name must be a string: {type(self.experiment_name)}")
             raise TypeError(f"experiment_name must be a string: {type(self.experiment_name)}")
 
         if not self.experiment_name.strip():
-            logger.error("experiment_name cannot be empty or whitespace.")
             raise ValueError("experiment_name cannot be empty or whitespace.")
 
     def _validate_len_bin_seq(self) -> None:
         """Validate binary sequence length."""
         if not isinstance(self.len_bin_seq, int):
-            logger.error(f"len_bin_seq must be int: {type(self.len_bin_seq)}")
             raise TypeError(f"len_bin_seq must be int: {type(self.len_bin_seq)}")
 
         if self.len_bin_seq < cm.MIN_BIT_LEN:
-            logger.error(f"len_bin_seq {self.len_bin_seq} is less than the minimum length allowed {cm.MIN_BIT_LEN}.")
             raise ValueError(f"len_bin_seq {self.len_bin_seq} is less than the minimum length allowed {cm.MIN_BIT_LEN}.")
 
         if self.len_bin_seq > cm.MAX_BIT_LEN:
-            logger.error(f"len_bin_seq {self.len_bin_seq} exceeds the maximum length allowed {cm.MAX_BIT_LEN}.")
             raise ValueError(f"len_bin_seq {self.len_bin_seq} exceeds the maximum length allowed {cm.MAX_BIT_LEN}.")
 
     def _validate_method_dist(self) -> None:
         """Validate distribution method."""
 
-        if self.method_dist not in cm.DIST_METHODS:
-            logger.error(f"Invalid method_dist: {self.method_dist} Valid options: {cm.DIST_METHODS}")
-            raise ValueError(f"method_dist must be one of {cm.DIST_METHODS}: '{self.method_dist}'")
+        if self.method_dist not in cm.METHOD_DIST:
+            raise ValueError(f"method_dist must be one of {cm.METHOD_DIST}: '{self.method_dist}'")
 
     def _validate_num_epochs(self) -> None:
         """Validate number of epochs."""
         if not isinstance(self.num_epochs, int):
-            logger.error(f"num_epochs must be an integer: {type(self.num_epochs)}")
             raise TypeError(f"num_epochs must be an integer: {type(self.num_epochs)}")
 
         if self.num_epochs <= 0:
-            logger.error(f"num_epochs {self.num_epochs} is not positive.")
             raise ValueError(f"num_epochs must be positive: {self.num_epochs}")
 
     def _validate_num_samples(self) -> None:
         """Validate number of samples."""
         if not isinstance(self.num_samples, int):
-            logger.error(f"num_samples must be an integer: {type(self.num_samples)}")
             raise TypeError(f"num_samples must be an integer: {type(self.num_samples)}")
 
         if self.num_samples <= 0:
-            logger.error(f"num_samples {self.num_samples} is not positive.")
             raise ValueError(f"num_samples must be positive: {self.num_samples}")
 
         if self.num_samples > cm.MAX_SAMPLE_SIZE:
-            logger.error(f"num_samples {self.num_samples} exceeds the maximum allowed {cm.MAX_SAMPLE_SIZE}.")
             raise ValueError(f"num_samples must not exceed {cm.MAX_SAMPLE_SIZE}: {self.num_samples}")
 
     def _validate_ratio(self) -> None:
@@ -154,22 +138,18 @@ class CEMConfig:
             try:
                 self.ratio = float(self.ratio)
             except (ValueError, TypeError) as e:
-                logger.error(f"ratio must be convertible to float: {self.ratio}: {e}")
                 raise TypeError(f"ratio must be convertible to float: {self.ratio}: {e}")
 
         if self.ratio <= 0.0 or self.ratio > 1.0:
-            logger.error(f"ratio {self.ratio} is not in range (0.0, 1.0].")
             raise ValueError(f"ratio must be in range (0.0, 1.0]: {self.ratio}")
 
     def _validate_log_level(self) -> None:
         """Validate logging level."""
         if not isinstance(self.log_level, int):
-            logger.error(f"log_level must be an integer: {type(self.log_level)}")
             raise TypeError(f"log_level must be an integer: {type(self.log_level)}")
 
         valid_levels = [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL]
         if self.log_level not in valid_levels:
-            logger.error(f"log_level {self.log_level} is not a valid logging level. Valid levels: {valid_levels}")
             raise ValueError(f"log_level must be one of {valid_levels}: {self.log_level}")
 
     def to_dict(self) -> Dict[str, Any]:
@@ -211,7 +191,6 @@ class CEMArgumentParser:
         """Initialize argument parser."""
         self.description = description
         self.parser = self._create_parser()
-        logger.info("======== CEMArgumentParser initialized ======================")
 
     def _create_parser(self) -> argparse.ArgumentParser:
         """Create and configure argument parser.
@@ -245,10 +224,10 @@ class CEMArgumentParser:
         parser.add_argument(
             "--method_dist",
             type=str,
-            default=cm.DIST_METHODS[0],
-            choices=cm.DIST_METHODS,
-            help=f"Method for generating Bernoulli distributions: {cm.DIST_METHODS}. "
-                 f"Default: {cm.DIST_METHODS[0]}"
+            default=cm.METHOD_DIST[0],
+            choices=cm.METHOD_DIST,
+            help=f"Method for generating Bernoulli distributions: {cm.METHOD_DIST}. "
+                 f"Default: {cm.METHOD_DIST[0]}"
         )
 
         parser.add_argument(
@@ -346,12 +325,6 @@ Examples:
             # Parse arguments
             parsed_args = self.parser.parse_args(args)
 
-            logger.info(f"Parsed arguments: {parsed_args}")
-
-            # Set logging level
-            log_level = getattr(logging, parsed_args.log_level)
-            logger.setLevel(log_level)
-
             # Create and validate configuration
             config = CEMConfig(
                 len_bin_seq=parsed_args.len_bin_seq,
@@ -360,15 +333,12 @@ Examples:
                 num_epochs=parsed_args.num_epochs,
                 num_samples=parsed_args.num_samples,
                 ratio=parsed_args.ratio,
-                log_level=logging.getLevelName(parsed_args.log_level)
             )
 
-            logger.info(f"Configuration loaded successfully: {config}")
 
             return config
 
         except (ValueError, TypeError) as e:
-            logger.error(f"Configuration validation failed: {e}")
             print(f"\n Error: {e}\n")
             sys.exit(1)
 
@@ -377,7 +347,6 @@ Examples:
             raise
 
         except Exception as e:
-            logger.exception(f"Unexpected error during parsing: {e}")
             print(f"\n Unexpected error: {e}\n")
             sys.exit(1)
 
@@ -544,7 +513,6 @@ if __name__ == "__main__":
         print("=" * 80 + "\n")
 
     except Exception as e:
-        logger.exception("Example execution failed")
         print(f"\n Error during example: {e}\n")
 
 

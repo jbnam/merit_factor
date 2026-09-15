@@ -13,7 +13,7 @@ An experiment logging system integrating:
 This module provides a unified interface for all experiment tracking needs
 in machine learning training pipelines.
 
-Author: NAMRI
+Author: MJMARI
 License: Apache License 2.0
 Version: 0.1.0
 

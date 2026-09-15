@@ -13,7 +13,7 @@ This module provides functionality for:
 - Managing training logs with rotation and archival
 - Performance profiling
 
-Author: NAMRI
+Author: MJMARI
 License: Apache License 2.0
 Version: 0.1.0
 

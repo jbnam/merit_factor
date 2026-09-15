@@ -12,7 +12,7 @@ This module provides:
 - Comprehensive logging and performance profiling
 - Automatic fallback and error handling
 
-Author: NAMRI
+Author: MJMARI
 License: Apache License 2.0
 Version: 0.1.0
 

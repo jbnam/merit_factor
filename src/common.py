@@ -9,7 +9,7 @@ This module provides:
 - Definitions of project specific data types for NumPy, PyTorch, Python, and CUDA
 - Global constants for the CEM algorithm
 
-Author: NAMRI
+Author: MJMARI
 License: Apache License 2.0
 Version: 0.1.0
 
@@ -91,6 +91,9 @@ DATA_ELITES_FILE_NAME = "data_elites.hdf5"
 # ============================================================================
 # Environmental constants and Conguration Options
 # ============================================================================
+
+# CUDA compute capability
+STR_CC = "6.1"
 
 # Methods for Bernoulli distributions
 # "naive" method conducts CEM for a fixed length of binary sequences

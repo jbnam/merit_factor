@@ -9,7 +9,7 @@ This module dynamically queries GPU attributes and calculates optimal block size
 grid sizes, and iteration counts for CUDA kernel launches, taking into account
 register pressure and SM occupancy.
 
-Author: NAMRI
+Author: MJMARI
 License: Apache License 2.0
 Version: 0.1.0
 

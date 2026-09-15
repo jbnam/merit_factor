@@ -11,7 +11,7 @@ the bit patterns in elite binary sequences, enabling adaptive probability update
 for evolutionary algorithms and provides GPU-accelerated generation of random
 binary sequences with Bernoulli-distributed bits, optimized for NVIDIA GPUs.
 
-Author: NAMRI
+Author: MJMARI
 License: Apache License 2.0
 Version: 0.1.0
 

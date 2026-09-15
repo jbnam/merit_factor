@@ -7,7 +7,7 @@ A high-performance module for reshaping and concatenating CPU tensors.
 This module handles the reshaping of 3D and 2D tensors into 2D and 1D tensors, respectively, and
 concatenates them along the first dimension with support for both CPU operations.
 
-Author: NAMRI
+Author: MJMARI
 License: Apache License 2.0
 Version: 0.1.0
 
