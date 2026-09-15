@@ -110,11 +110,16 @@ class CEMInitResult:
         Configured logger instance.
     """
     distribution: torch.Tensor
+
     log_dir: str
+    timestamp_log_dir: str
+    method_len_dir: str
     summary_bin_seq_path: str
     summary_elites_path: str
     data_elites_path: str
+
     max_merit_dict: Dict[str, Any]
+
     logger: mf_logger.ExperimentLogger
 
 
@@ -238,16 +243,9 @@ class CEMInitializer:
         # Initialize distribution
         try:
             if self.config.method_dist == cm.METHOD_DIST[0]:
-                distribution, max_merit_dict = self._initialize_naive_distribution(
-                    self.config.len_bin_seq,
-                    logger
-                )
+                distribution, max_merit_dict = self._initialize_naive_distribution()
             elif self.config.method_dist == cm.METHOD_DIST[1]:
-                distribution, max_merit_dict = self._initialize_recursive_distribution(
-                    method_len_dir,
-                    self.config.len_bin_seq,
-                    logger
-                )
+                distribution, max_merit_dict = self._initialize_recursive_distribution(method_len_dir)
             else:
                 raise ValueError(f"Unknown method: {self.config.method_dist}")
 
@@ -311,15 +309,15 @@ class CEMInitializer:
 
     def _initialize_recursive_distribution(
         self,
-        logger: mf_logger.ExperimentLogger
+        method_len_dir: str,
     ) -> Tuple[torch.Tensor, Dict[str, Any]]:
         """
         Initialize recursive distribution from previous run.
 
         Parameters
         ----------
-        logger : mf_logger.ExperimentLogger
-            Logger instance.
+        method_len_dir: str
+            Path of method_dist / len_bin_seq.
 
         Returns
         -------
@@ -332,12 +330,12 @@ class CEMInitializer:
             If no previous run found.
 
         """
-        logger.info(f"Initializing recursive distribution from {method_dist_dir}")
+        logger.info(f"Initializing recursive distribution from {method_len_dir}")
 
         # WARNING! Scan for directories with numeric names (sequence lengths)
-        method_dir = Path(method_dist_dir)
+        method_dir = Path(method_len_dir)
         if not method_dir.exists():
-            raise ValueError(f"Method directory not found: {method_dist_dir}")
+            raise ValueError(f"Method directory not found: {method_len_dir}")
 
         # Find all numeric subdirectories (previous sequence lengths)
         numeric_dirs = []
@@ -347,17 +345,17 @@ class CEMInitializer:
 
         if not numeric_dirs:
             raise ValueError(
-                f"No previous runs found in {method_dist_dir}. "
+                f"No previous runs found in {method_len_dir}. "
                 f"Use 'naive' method instead."
             )
 
         # Find the maximum length that is less than len_bin_seq
         # WARNING! Must find largest len_bin_seq that is < current len_bin_seq
-        valid_dirs = [(length, path) for length, path in numeric_dirs if length < len_bin_seq]
+        valid_dirs = [(length, path) for length, path in numeric_dirs if length < self.config.len_bin_seq]
 
         if not valid_dirs:
             raise ValueError(
-                f"No previous run with sequence length < {len_bin_seq}. "
+                f"No previous run with sequence length < {self.config.len_bin_seq}. "
                 f"Use 'naive' method instead."
             )
 
@@ -433,17 +431,17 @@ class CEMInitializer:
         distribution_tensor = torch.from_numpy(distribution_data).to(cm.T_FLOAT32)
 
         # WARNING! Pad distribution to match current sequence length
-        if len(distribution_tensor) < len_bin_seq:
+        if len(distribution_tensor) < self.config.len_bin_seq:
             padding = torch.full(
-                (len_bin_seq - len(distribution_tensor),),
+                (self.config.len_bin_seq - len(distribution_tensor),),
                 0.5,
                 dtype=cm.T_FLOAT32
             )
             distribution_tensor = torch.cat([distribution_tensor, padding])
-            logger.info(f"Padded distribution from {len(distribution_data)} to {len_bin_seq}")
-        elif len(distribution_tensor) > len_bin_seq:
-            distribution_tensor = distribution_tensor[:len_bin_seq]
-            logger.info(f"Truncated distribution from {len(distribution_data)} to {len_bin_seq}")
+            logger.info(f"Padded distribution from {len(distribution_data)} to {self.config.len_bin_seq}")
+        elif len(distribution_tensor) > self.config.len_bin_seq:
+            distribution_tensor = distribution_tensor[:self.config.len_bin_seq]
+            logger.info(f"Truncated distribution from {len(distribution_data)} to {self.config.len_bin_seq}")
 
         return distribution_tensor, max_merit_dict
 
