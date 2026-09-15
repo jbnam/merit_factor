@@ -71,12 +71,12 @@ class CEMConfig:
     ValueError
         If any parameter is invalid.
     """
-    experiment_name: str
-    len_bin_seq: int
-    method_dist: str
-    num_epochs: int
-    num_samples: int
-    ratio: float
+    experiment_name: str = "cem_experiment"
+    len_bin_seq: int = 16
+    method_dist: str = cm.METHOD_DIST[0]
+    num_epochs: int = 10
+    num_samples: int = 1000
+    ratio: float = 0.1
     log_level: int = logging.INFO
 
     def __post_init__(self) -> None:
