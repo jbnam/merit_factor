@@ -31,6 +31,7 @@ File Structure:
     - summary_elites.hdf5: Elite sequences statistics
     - data_elites.hdf5: Elite sequence data
 """
+import logging
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Tuple
@@ -45,6 +46,9 @@ import src.cem.parser as parser
 import src.utils.logger as mf_logger
 import src.utils.cuda_parameters as cuda_params
 import src.utils.stats as stats
+
+# Initialize logger
+logger = logging.getLogger(__name__)
 
 # ============================================================================
 # Configuration Data Classes
@@ -298,7 +302,7 @@ class CEMInitializer:
 
         # TODO TODO
         # Check if there exists a previously completed
-        if
+
 
         logger.info("Initializing naive distribution (uniform 0.5)")
 

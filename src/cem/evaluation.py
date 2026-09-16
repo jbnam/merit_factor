@@ -1,6 +1,6 @@
 """
-CUDA Merit Factor Computation Module
-=====================================
+CUDA Evaluation for Merit Factor Module
+=======================================
 
 A high-performance module for computing merit factors of binary sequences
 using CUDA kernels with JIT compilation via PyTorch's load_inline.

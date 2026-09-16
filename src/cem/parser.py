@@ -261,13 +261,6 @@ class CEMArgumentParser:
         )
 
         parser.add_argument(
-            "--log_dir",
-            type=str,
-            default="./logs",
-            help="Directory for log files. Default: ./logs"
-        )
-
-        parser.add_argument(
             "-v", "--version",
             action="version",
             version="cem_Golay_merit_factor v0.1"
@@ -287,9 +280,6 @@ Examples:
 
   # Using recursive method for distribution
   python golay.py --len_bin_seq 256 --experiment_name test_1 --method_dist recursive --num_epochs 50
-
-  # With debug logging
-  python golay.py --len_bin_seq 256 --experiment_name test_1 --log_level DEBUG --log_dir ./debug_logs
 """
 
     def parse_args(
@@ -334,7 +324,6 @@ Examples:
                 num_samples=parsed_args.num_samples,
                 ratio=parsed_args.ratio,
             )
-
 
             return config
 

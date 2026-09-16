@@ -41,10 +41,17 @@ from enum import Enum
 import torch
 
 import common as cm
+import src.cem.parser as parser
+import src.utils.logger as mf_logger
 
 if __name__ == "__main__":
     # Set GPU environment
     if torch.cuda.is_available():
         os.environ["TORCH_CUDA_ARCH_LIST"] = cm.STR_CC
 
-    #
+    # Parse the arguments
+    args = mf_logger.CEMArgumentParser()
+    config = parser.parse_args(args)
+
+    # Set up the logger
+    logger = mf_logger.ExperimentLogger(experiment_name=config.experiment_name)
