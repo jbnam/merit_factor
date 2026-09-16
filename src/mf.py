@@ -55,3 +55,5 @@ if __name__ == "__main__":
 
     # Set up the logger
     logger = mf_logger.ExperimentLogger(experiment_name=config.experiment_name)
+
+    # Initialize the CEM algorithm with configuration setups and path management
