@@ -81,7 +81,7 @@ class CEMInitConfig:
     num_iterations : int
         Number of iterations per epoch.
     """
-    experiment_name: str = "cem"
+    experiment_name: str = "cem_merit_factor"
     len_bin_seq: int
     method_dist: str
     num_epochs: int
@@ -111,8 +111,6 @@ class CEMInitResult:
         Path to elites data file.
     max_merit_dict : dict
         Dictionary of elite sequences with maximum merit factor.
-    logger : mf_logger.ExperimentLogger
-        Configured logger instance.
     """
     distribution: torch.Tensor
 
@@ -122,9 +120,6 @@ class CEMInitResult:
     summary_bin_seq_path: str
     summary_elites_path: str
     data_elites_path: str
-
-    logger: mf_logger.ExperimentLogger
-
 
 # ============================================================================
 # CEM Initializer
@@ -149,9 +144,6 @@ class CEMInitializer:
         """Initialize CEM initializer."""
         self.config = CEMInitConfig()
 
-        # Set up mf_logger.ExperimentLogger()
-        self.logger = mf_logger.ExperimentLogger(experiment_name=self.config.experiment_name)
-
         self.init_results = self.initisize(pars_config)
 
     def _create_log_directory(self) -> Tuple[str, str]:
@@ -167,7 +159,7 @@ class CEMInitializer:
             (timestamp_log_dir, method_len_dir)
         """
         # Create method/length directory structure
-        method_dir = self.logger.log_dir / self.config.method_dist
+        method_dir = logger.log_dir / self.config.method_dist
         method_dir.mkdir(parents=True, exist_ok=True)
 
         method_len_dir = method_dir / str(self.config.len_bin_seq)
