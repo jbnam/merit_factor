@@ -300,14 +300,10 @@ class ExperimentFormatter(logging.Formatter):
         try:
             snapshot = self.monitor.get_snapshot()
 
-            record.uptime = snapshot.uptime
-            record.cpu_pct = f"{snapshot.cpu_percent:.1f}%"
             record.ram_gb = f"{snapshot.ram_used_gb:.1f}/{snapshot.ram_total_gb:.1f}GB"
             record.gpu_gb = f"{snapshot.gpu_allocated_gb:.2f}/{snapshot.gpu_reserved_gb:.2f}GB"
         except Exception:
             # Fallback if resource monitoring fails
-            record.uptime = "N/A"
-            record.cpu_pct = "N/A"
             record.ram_gb = "N/A"
             record.gpu_gb = "N/A"
 
@@ -481,8 +477,8 @@ class ExperimentLogger:
 
         # Formatter
         log_format = (
-            "[%(asctime)s] [%(uptime)s] "
-            "[CPU: %(cpu_pct)s | RAM: %(ram_gb)s | GPU: %(gpu_gb)s] "
+            "[%(asctime)s] "
+            "[RAM: %(ram_gb)s | GPU: %(gpu_gb)s] "
             "[%(levelname)s] %(message)s"
         )
         date_format = "%H:%M:%S"
