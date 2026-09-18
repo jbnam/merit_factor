@@ -34,6 +34,7 @@ import os
 import argparse
 import logging
 import sys
+from pathlib import Path
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass, asdict
 from enum import Enum
@@ -57,3 +58,4 @@ if __name__ == "__main__":
     logger = mf_logger.ExperimentLogger(experiment_name=config.experiment_name)
 
     # Initialize the CEM algorithm with configuration setups and path management
+    log_dir = logger.log_dir

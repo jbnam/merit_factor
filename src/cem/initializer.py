@@ -81,7 +81,7 @@ class CEMInitConfig:
     num_iterations : int
         Number of iterations per epoch.
     """
-    experiment_name: str = "cem_merit_factor"
+
     len_bin_seq: int
     method_dist: str
     num_epochs: int
@@ -92,6 +92,7 @@ class CEMInitConfig:
     grid_size: int
     block_size: int
     num_iterations: int
+    experiment_name: str = "cem_merit_factor"
 
 @dataclass
 class CEMInitResult:
@@ -130,6 +131,8 @@ class CEMInitializer:
 
     Parameters
     ----------
+    log_dir : Path
+        Directory path of experiment name (logs / experiment_name)
     pars_config : parser.CEMConfig
         CEM Configuration parsed.
 
@@ -140,18 +143,20 @@ class CEMInitializer:
     >>> result = initializer.initialize()
     """
 
-    def __init__(self, pars_config : parser.CEMConfig):
+    def __init__(self, log_dir : Path, pars_config : parser.CEMConfig):
         """Initialize CEM initializer."""
-        self.config = CEMInitConfig()
+        self.config = CEMInitConfig
 
-        self.init_results = self.initisize(pars_config)
+        self.init_results = self.initialize(log_dir, pars_config)
 
-    def _create_log_directory(self) -> Tuple[str, str]:
+    def _create_log_directory(self, log_dir : Path) -> Tuple[str, str]:
         """
         Create log directory structure and return paths.
 
         Parameters
         ----------
+        log_dir : Path
+            Directory path of experiment name (logs / experiment_name)
 
         Returns
         -------
@@ -159,7 +164,7 @@ class CEMInitializer:
             (timestamp_log_dir, method_len_dir)
         """
         # Create method/length directory structure
-        method_dir = logger.log_dir / self.config.method_dist
+        method_dir = log_dir / self.config.method_dist
         method_dir.mkdir(parents=True, exist_ok=True)
 
         method_len_dir = method_dir / str(self.config.len_bin_seq)
@@ -173,6 +178,7 @@ class CEMInitializer:
 
     def initialize(
         self,
+        log_dir : Path,
         pars_config : parser.CEMConfig
     ) -> CEMInitResult:
         """
@@ -180,6 +186,8 @@ class CEMInitializer:
 
         Parameters
         ----------
+        log_dir : Path
+            Directory path of experiment name (logs / experiment_name)
         pars_config : parser.CEMConfig
             Parser configuration.
 
@@ -223,10 +231,7 @@ class CEMInitializer:
         self.config.num_iterations = dimensions.num_iterations
 
         # Create directories and logger
-        method_len_dir, timestamp_log_dir = self._create_log_directory(
-            self.config.method_dist,
-            self.config.len_bin_seq
-        )
+        method_len_dir, timestamp_log_dir = self._create_log_directory(log_dir)
 
         log_file_path = Path(timestamp_log_dir) / cm.LOG_FILE_NAME
 
@@ -238,7 +243,7 @@ class CEMInitializer:
         # Initialize distribution
         try:
             if self.config.method_dist == cm.METHOD_DIST[0]:
-                distribution, max_merit_dict = self._initialize_naive_distribution(method_len_dir, timestamp_log_dir)
+                distribution = self._initialize_naive_distribution(method_len_dir, timestamp_log_dir)
             elif self.config.method_dist == cm.METHOD_DIST[1]:
                 distribution, max_merit_dict = self._initialize_recursive_distribution(method_len_dir, timestamp_log_dir)
             else:
@@ -259,12 +264,12 @@ class CEMInitializer:
 
         return CEMInitResult(
             distribution=distribution,
-            log_dir=timestamp_log_dir,
+            log_dir=log_dir,
+            method_len_dir=method_len_dir,
+            timestamp_log_dir=timestamp_log_dir,
             summary_bin_seq_path=summary_bin_seq_path,
             summary_elites_path=summary_elites_path,
             data_elites_path=data_elites_path,
-            max_merit_dict=max_merit_dict,
-            logger=logger
         )
 
     def _initialize_naive_distribution(self,
@@ -283,13 +288,14 @@ class CEMInitializer:
 
         Returns
         -------
-        tuple of (torch.Tensor, dict)
-            (distribution, max_merit_dict)
+        torch.Tensor
+            Bernoulli distribution for a binary sequence
 
         Examples
         --------
         >>>
-        >>> dist, max_dict = initializer._initialize_naive_distribution()
+        >>> method_len_dir = Path("logs/experiment_name/method/len_bin_seq")
+        >>> dist = initializer._initialize_naive_distribution(method_len_dir)
         """
 
         # TODO TODO
@@ -454,6 +460,7 @@ class CEMInitializer:
 # ============================================================================
 
 def initialize_cem(
+    log_dir : Path,
     pars_config : parser.CEMConfig
 ) -> CEMInitResult:
     """
@@ -471,12 +478,13 @@ def initialize_cem(
 
     Examples
     --------
+    >>> log_dir = Path("./logs/test_initializer")
     >>> pars_config = parser.CEMConfig()
-    >>> result = initialize_cem(pars_config)
+    >>> result = initialize_cem(log_dir, pars_config)
     >>> logger = result.logger
     """
-    initializer = CEMInitializer(pars_config)
-    return initializer.initialize(pars_config)
+    initializer = CEMInitializer(log_dir, pars_config)
+    return initializer.initialize(log_dir, pars_config)
 
 if __name__ == "__main__":
     """Comprehensive example demonstrating CEM initialization."""
@@ -485,20 +493,19 @@ if __name__ == "__main__":
     print("CEM Initializer - Example Usage")
     print("=" * 80)
 
+    log_dir = Path("./logs/test_initializer")
     pars_config = parser.CEMConfig()
-    initializer = CEMInitializer(pars_config)
+    initializer = CEMInitializer(log_dir, pars_config)
 
     try:
         # Example 1: Naive initialization
         print("\n[Example 1] Naive Distribution Initialization")
         print("-" * 80)
 
-        result = initialize_cem(pars_config)
+        result = initialize_cem(log_dir, pars_config)
 
-        logger = result.logger
         logger.info(f"Distribution shape: {result.distribution.shape}")
         logger.info(f"Distribution mean: {result.distribution.mean():.6f}")
-        logger.info(f"Max merit dict: {result.max_merit_dict}")
 
         print(f"  Initialized CEM with naive method")
         print(f"  Log dir: {result.log_dir}")
@@ -520,7 +527,7 @@ if __name__ == "__main__":
         error_cases = [
             {"len": 10, "method": cm.METHOD_DIST[0], "should_fail": True},  # Too small
             {"len": 5000, "method": cm.METHOD_DIST[0], "should_fail": True},  # Too large
-            {"len": 256, "method": cm.METHOD_DIST[2], "should_fail": True},  # Invalid method
+            {"len": 256, "method": "invalid", "should_fail": True},  # Invalid method
             {"len": 256, "method": cm.METHOD_DIST[0], "should_fail": False},  # Valid
         ]
 
