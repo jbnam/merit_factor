@@ -346,6 +346,7 @@ class CEMInitializer:
         # WARNING! Scan for directories with numeric names (sequence lengths)
         method_dir = Path(method_len_dir)
         if not method_dir.exists():
+            logger.error(f"Method directory not found: {method_len_dir}")
             raise ValueError(f"Method directory not found: {method_len_dir}")
 
         # Find all numeric subdirectories (previous sequence lengths)
@@ -355,6 +356,10 @@ class CEMInitializer:
                 numeric_dirs.append((int(item.name), item))
 
         if not numeric_dirs:
+            logger.error(
+                f"No previous runs found in {method_len_dir}. "
+                f"Use 'naive' method instead."
+            )
             raise ValueError(
                 f"No previous runs found in {method_len_dir}. "
                 f"Use 'naive' method instead."
@@ -365,6 +370,10 @@ class CEMInitializer:
         valid_dirs = [(length, path) for length, path in numeric_dirs if length < self.config.len_bin_seq]
 
         if not valid_dirs:
+            logger.error(
+                f"No previous run with sequence length < {self.config.len_bin_seq}. "
+                f"Use 'naive' method instead."
+            )
             raise ValueError(
                 f"No previous run with sequence length < {self.config.len_bin_seq}. "
                 f"Use 'naive' method instead."
@@ -383,6 +392,7 @@ class CEMInitializer:
         )
 
         if not timestamp_dirs:
+            logger.error(f"No timestamp directories found in {source_dir}")
             raise ValueError(f"No timestamp directories found in {source_dir}")
 
         latest_timestamp_dir = timestamp_dirs[0]
@@ -392,6 +402,7 @@ class CEMInitializer:
         elites_summary_path = latest_timestamp_dir / cm.SUMMARY_ELITES_FILE_NAME
 
         if not elites_summary_path.exists():
+            logger.error(f"Elite summary not found: {elites_summary_path}")
             raise FileNotFoundError(f"Elite summary not found: {elites_summary_path}")
 
         # WARNING! Load distribution from HDF5 file
@@ -400,6 +411,7 @@ class CEMInitializer:
                 # Get most recent epoch
                 epochs = sorted([int(k) for k in f.keys()])
                 if not epochs:
+                    logger.error("No epochs found in summary file")
                     raise ValueError("No epochs found in summary file")
 
                 latest_epoch = epochs[-1]
