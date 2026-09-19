@@ -44,6 +44,7 @@ import torch
 import common as cm
 import src.cem.parser as parser
 import src.utils.logger as mf_logger
+import src.cem.initializer as mf_init
 
 if __name__ == "__main__":
     # Set GPU environment
@@ -52,10 +53,12 @@ if __name__ == "__main__":
 
     # Parse the arguments
     args = mf_logger.CEMArgumentParser()
-    config = parser.parse_args(args)
+    pars_config = parser.parse_args(args)
 
     # Set up the logger
-    logger = mf_logger.ExperimentLogger(experiment_name=config.experiment_name)
+    logger = mf_logger.ExperimentLogger(experiment_name=pars_config.experiment_name)
 
     # Initialize the CEM algorithm with configuration setups and path management
     log_dir = logger.log_dir
+    cem_initializer = mf_init.CEMInitializer(log_dir, pars_config)
+    init_result = cem_initializer.initialize(log_dir, pars_config)

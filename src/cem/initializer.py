@@ -289,7 +289,7 @@ class CEMInitializer:
         Returns
         -------
         torch.Tensor
-            Bernoulli distribution for a binary sequence
+            Bernoulli distribution from the latest elites
 
         Examples
         --------
@@ -298,11 +298,12 @@ class CEMInitializer:
         >>> dist = initializer._initialize_naive_distribution(method_len_dir)
         """
 
-        # TODO TODO
-        # Check if there exists a previously completed
-
-
         logger.info("Initializing naive distribution (uniform 0.5)")
+
+        # TODO TODO
+        # Check if there exists a previously completed iteration of the same
+        # length of binary sequences. If there exists, retrieve the latest
+        # Bernoullli distribution.
 
         distribution = torch.full(
             (self.config.len_bin_seq,),
@@ -317,7 +318,7 @@ class CEMInitializer:
     def _initialize_recursive_distribution(
         self,
         method_len_dir: str,
-        timestamp_log_dir: str) -> Tuple[torch.Tensor, Dict[str, Any]]:
+        timestamp_log_dir: str) -> torch.Tensor:
         """
         Initialize recursive distribution from previous run.
 
@@ -331,8 +332,8 @@ class CEMInitializer:
 
         Returns
         -------
-        tuple of (torch.Tensor, dict)
-            (distribution, max_merit_dict)
+        torch.Tensor
+            Bernoulli distribution from the latest elites
 
         Raises
         ------
