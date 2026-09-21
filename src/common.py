@@ -84,6 +84,7 @@ N_FLOAT64 = np.float64
 
 LOG_DIR_NAME = "logs"
 LOG_FILE_NAME = "experiment.log"
+CHECKPOINTS_DIR_NAME = "checkpoints"
 SUMMARY_BIN_SEQ_FILE_NAME = "summary_bin_seq.hdf5"
 SUMMARY_ELITES_FILE_NAME = "summary_elites.hdf5"
 DATA_ELITES_FILE_NAME = "data_elites.hdf5"

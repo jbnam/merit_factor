@@ -407,7 +407,7 @@ class ExperimentLogger:
     >>> logger.save_all_metrics()
     """
 
-    #logger_config = LoggerConfig()
+    logger_config = LoggerConfig()
 
     def __init__(
         self,

@@ -27,9 +27,6 @@ File Structure:
   - logs/{method_dist}/{len_bin_seq}/{timestamp}/
     - logs.log: Main log file
   - logs/{method_dist}/{len_bin_seq}/
-    - summary_bin_seq.hdf5: All sequences statistics
-    - summary_elites.hdf5: Elite sequences statistics
-    - data_elites.hdf5: Elite sequence data
 """
 import logging
 from pathlib import Path
@@ -80,6 +77,14 @@ class CEMInitConfig:
         Number of threads per block.
     num_iterations : int
         Number of iterations per epoch.
+    log_dir : Path (default Path())
+        Logging directory path.
+    timestamp_log_dir: Path (default Path())
+        Timestamped logging directory path.
+    method_len_dir : Path (default Path())
+        Method / Length of Binary Sequence path.
+    distribution : torch.Tensor (default "cem_merit_factor")
+        Initial Bernoulli distribution.
     """
 
     len_bin_seq: int
@@ -92,35 +97,14 @@ class CEMInitConfig:
     grid_size: int
     block_size: int
     num_iterations: int
-    experiment_name: str = "cem_merit_factor"
 
-@dataclass
-class CEMInitResult:
-    """Result of CEM initialization.
+    log_dir: Path = Path()
+    timestamp_log_dir: Path = Path()
+    method_len_dir: Path = Path()
 
-    Attributes
-    ----------
-    distribution : torch.Tensor
-        Initial Bernoulli distribution.
-    log_dir : str
-        Logging directory path.
-    summary_bin_seq_path : str
-        Path to binary sequence summary file.
-    summary_elites_path : str
-        Path to elites summary file.
-    data_elites_path : str
-        Path to elites data file.
-    max_merit_dict : dict
-        Dictionary of elite sequences with maximum merit factor.
-    """
     distribution: torch.Tensor
 
-    log_dir: str
-    timestamp_log_dir: str
-    method_len_dir: str
-    summary_bin_seq_path: str
-    summary_elites_path: str
-    data_elites_path: str
+    experiment_name: str = "cem_merit_factor"
 
 # ============================================================================
 # CEM Initializer
@@ -167,11 +151,11 @@ class CEMInitializer:
         method_dir = log_dir / self.config.method_dist
         method_dir.mkdir(parents=True, exist_ok=True)
 
-        method_len_dir = method_dir / str(self.config.len_bin_seq)
-        method_len_dir.mkdir(parents=True, exist_ok=True)
+        self.config.method_len_dir = method_dir / str(self.config.len_bin_seq)
+        self.config.method_len_dir.mkdir(parents=True, exist_ok=True)
 
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        timestamp_log_dir = method_len_dir / timestamp
+        timestamp_log_dir = self.config.method_len_dir / timestamp
         timestamp_log_dir.mkdir(parents=True, exist_ok=True)
 
         return str(method_len_dir), str(timestamp_log_dir)
@@ -180,7 +164,7 @@ class CEMInitializer:
         self,
         log_dir : Path,
         pars_config : parser.CEMConfig
-    ) -> CEMInitResult:
+    ) -> None:
         """
         Initialize CEM with all necessary components.
 
@@ -193,22 +177,19 @@ class CEMInitializer:
 
         Returns
         -------
-        CEMInitResult
-            Complete initialization result.
 
         Raises
         ------
         ValueError
             If configuration is invalid.
 
-        WARNING! All parameters must be validated before processing
-        WARNING! Directories must be created before logging
+        WARNING: Directories must be created before logging
 
         Examples
         --------
         >>> pars_config = pars.CEMConfig()
         >>> initializer = CEMInitializer(pars_config)
-        >>> result = initializer.initialize(pars_config)
+        >>> initializer.initialize(pars_config)
         >>> logger = result.logger
         """
         self.config.experiment_name = pars_config.experiment_name
@@ -245,7 +226,7 @@ class CEMInitializer:
             if self.config.method_dist == cm.METHOD_DIST[0]:
                 distribution = self._initialize_naive_distribution(method_len_dir, timestamp_log_dir)
             elif self.config.method_dist == cm.METHOD_DIST[1]:
-                distribution, max_merit_dict = self._initialize_recursive_distribution(method_len_dir, timestamp_log_dir)
+                distribution = self._initialize_recursive_distribution(method_len_dir, timestamp_log_dir)
             else:
                 raise ValueError(f"Unknown method: {self.config.method_dist}")
 
@@ -303,7 +284,27 @@ class CEMInitializer:
         # TODO TODO
         # Check if there exists a previously completed iteration of the same
         # length of binary sequences. If there exists, retrieve the latest
-        # Bernoullli distribution.
+        # Bernoullli distribution from summary_elites_path in CEMInitResult.
+
+        # Find the last summary of elites and retrieve the last distribution.
+        summ_elites_path = Path(self.init_results.summary_elites_path)
+
+        last_timestamp_log_dir = max(
+            (dt for dt in method_len_path.iterdir() if dt.is_dir() and is_timestamp_dir_valid(dt.name)),
+            key=lambda dt: datetime.strptime(dt.name, "%Y-%m-%d_%H-%M-%S"),
+            default=None # Prevents crash if no valid directories exist.
+        )
+
+        # Retrive
+
+        if
+
+
+
+
+
+
+
 
         distribution = torch.full(
             (self.config.len_bin_seq,),
@@ -469,7 +470,7 @@ class CEMInitializer:
         return distribution_tensor, max_merit_dict
 
 # ============================================================================
-# Convenience Function (Legacy API)
+# Convenience Functions (Legacy API & Utils)
 # ============================================================================
 
 def initialize_cem(
@@ -498,6 +499,30 @@ def initialize_cem(
     """
     initializer = CEMInitializer(log_dir, pars_config)
     return initializer.initialize(log_dir, pars_config)
+
+def is_timestamp_dir_valid( dir : str ) -> bool:
+    """
+    Check if the name of a directory is in a valid
+    timestamp_log_dir "%Y-%m-%d_%H-%M-%S" format or not.
+
+    Parameters
+    ----------
+    dir : str
+        The path of a directory
+
+    Returns
+    -------
+    bool
+
+    Examples
+    --------
+    >>> dir = "2026-09-19_13-35-58"
+    >>> is_timestamp_dir_valid(dir)
+    """
+    if datetime.strptime(dir, "%Y-%m-%d_%H-%M-%S"):
+        return True
+    else:
+        return False
 
 if __name__ == "__main__":
     """Comprehensive example demonstrating CEM initialization."""
