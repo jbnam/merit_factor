@@ -55,7 +55,7 @@ NUM_REG_PER_THREAD = 32
 WARP_SIZE = 32
 
 # A mask for the maximum value of a 32-bit unsigned integer, for bitwise operations
-MAX_UINT32 = 0xFFFFFFFF
+MAX_UINT32 = 0xFFFFFFFF  # Binary: 1111...1111
 MSB_ZERO_MASK32 = 0x7FFFFFFF  # Binary: 0111...1111
 MSB_ONE_MASK32 = 0x80000000   # Binary: 1000...0000
 

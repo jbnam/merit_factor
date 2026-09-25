@@ -2,8 +2,8 @@
 Command-Line Argument Parser Module
 ====================================
 
-A professional-grade argument parser for the Cross-Entropy Method (CEM)
-applied to Golay's Merit Factor Problem, with comprehensive validation,
+An argument parser for the Cross-Entropy Method (CEM) applied
+to Golay's Merit Factor Problem, with comprehensive validation,
 logging, and configuration management.
 
 This module provides:

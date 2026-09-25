@@ -99,8 +99,8 @@ class CEMInitConfig:
     num_iterations: int
 
     log_dir: Path = Path()
-    timestamp_log_dir: Path = Path()
     method_len_dir: Path = Path()
+    timestamp_log_dir: Path = Path()
 
     distribution: torch.Tensor
 
@@ -145,7 +145,7 @@ class CEMInitializer:
         Returns
         -------
         tuple of (str, str)
-            (timestamp_log_dir, method_len_dir)
+            (method_len_dir, timestamp_log_dir)
         """
         # Create method/length directory structure
         method_dir = log_dir / self.config.method_dist
@@ -155,10 +155,10 @@ class CEMInitializer:
         self.config.method_len_dir.mkdir(parents=True, exist_ok=True)
 
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        timestamp_log_dir = self.config.method_len_dir / timestamp
-        timestamp_log_dir.mkdir(parents=True, exist_ok=True)
+        self.config.timestamp_log_dir = self.config.method_len_dir / timestamp
+        self.config.timestamp_log_dir.mkdir(parents=True, exist_ok=True)
 
-        return str(method_len_dir), str(timestamp_log_dir)
+        return str(self.config.method_len_dir), str(self.config.timestamp_log_dir)
 
     def initialize(
         self,
@@ -243,16 +243,6 @@ class CEMInitializer:
         logger.info(f"Summary elites path: {summary_elites_path}")
         logger.info(f"Data elites path: {data_elites_path}")
 
-        return CEMInitResult(
-            distribution=distribution,
-            log_dir=log_dir,
-            method_len_dir=method_len_dir,
-            timestamp_log_dir=timestamp_log_dir,
-            summary_bin_seq_path=summary_bin_seq_path,
-            summary_elites_path=summary_elites_path,
-            data_elites_path=data_elites_path,
-        )
-
     def _initialize_naive_distribution(self,
                                        method_len_dir: str,
                                        timestamp_log_dir: str) -> torch.Tensor:
@@ -290,7 +280,7 @@ class CEMInitializer:
         summ_elites_path = Path(self.init_results.summary_elites_path)
 
         last_timestamp_log_dir = max(
-            (dt for dt in method_len_path.iterdir() if dt.is_dir() and is_timestamp_dir_valid(dt.name)),
+            (dt for dt in self.configmethod_len_path.iterdir() if dt.is_dir() and is_timestamp_dir_valid(dt.name)),
             key=lambda dt: datetime.strptime(dt.name, "%Y-%m-%d_%H-%M-%S"),
             default=None # Prevents crash if no valid directories exist.
         )
@@ -476,7 +466,7 @@ class CEMInitializer:
 def initialize_cem(
     log_dir : Path,
     pars_config : parser.CEMConfig
-) -> CEMInitResult:
+) -> None:
     """
     Convenience function to initialize CEM (legacy API).
 
